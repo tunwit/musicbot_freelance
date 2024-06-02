@@ -260,33 +260,22 @@ class au(Button):
         self.interaction: discord.Interaction = interaction
         self.np = np
         
-    async def check_vip(self, v):
-        if self.interaction.client.mango["vip"].find_one({"user_id": str(v)}):
-            return True
-        else:
-            return False
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
         vc: wavelink.Player = interaction.guild.voice_client
         vc.interaction = interaction
-        respound = get_respound(interaction.locale, "viponly")
         au = [x for x in vc.Myview.children if x.custom_id == "au"][0]
         if not await check_before_play(self.interaction):
             return
-
-        if await self.check_vip(interaction.user.id):
-            if vc.autoplay == wavelink.AutoPlayMode.partial:
-                vc.autoplay = wavelink.AutoPlayMode.enabled
-                au.style = discord.ButtonStyle.green
-            elif vc.autoplay == wavelink.AutoPlayMode.enabled:
-                vc.autoplay = wavelink.AutoPlayMode.partial
-                au.style = discord.ButtonStyle.gray
-            await self.np(self, self.interaction)
-            try:
-                await interaction.followup.send(content="")
-            except:
-                pass
-        else:
-            embed = createembed.embed_fail(interaction, respound)
-            await interaction.followup.send(embed=embed)
+        if vc.autoplay == wavelink.AutoPlayMode.partial:
+            vc.autoplay = wavelink.AutoPlayMode.enabled
+            au.style = discord.ButtonStyle.green
+        elif vc.autoplay == wavelink.AutoPlayMode.enabled:
+            vc.autoplay = wavelink.AutoPlayMode.partial
+            au.style = discord.ButtonStyle.gray
+        await self.np(self, self.interaction)
+        try:
+            await interaction.followup.send(content="")
+        except:
+            pass

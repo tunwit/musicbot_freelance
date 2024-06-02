@@ -12,7 +12,6 @@ import random
 from discord.ui import Button, View
 from discord import app_commands
 from discord.app_commands import Choice
-from spotipy_random import get_random
 import random
 from ui.embed_gen import createembed
 from ui.language_respound import get_respound
@@ -280,8 +279,9 @@ class nowplaying:
                     npembed.add_field(
                         name=f"{respound.get('duration')}", value=f"`{duration}`"
                     )
+                    print(vc.playing)
                     npembed.set_footer(
-                        text=f"{'Paused'if not vc.playing else 'Playing'} | {vc.volume}% | LoopStatus:{trans_queueMode[f'wavelink.{str(vc.queue.mode)}']} | Autoplay:{trans_autoMode[f'wavelink.{str(vc.autoplay)}']}"
+                        text=f"{'Paused'if vc.paused else 'Playing'} | {vc.volume}% | LoopStatus:{trans_queueMode[f'wavelink.{str(vc.queue.mode)}']} | Autoplay:{trans_autoMode[f'wavelink.{str(vc.autoplay)}']}"
                     )
                     npembed.set_thumbnail(url=vc.current.artwork)
                     more = f"`{respound.get('andmore').format(more=len(vc.queue)-4)}`"
@@ -309,7 +309,7 @@ class nowplaying:
                         if send:
                             content = f'**{respound.get("queue")}:**\n{fmt}'f'\n{more}' if more else f'**{respound.get("queue")}:**\n{fmt}'
                             vc.np = await vc.interaction.followup.send(content=content, embed=npembed,view=vc.Myview ,file=file)
-                            return
+                            return vc.np
                         if vc.np:
                             try:
                                 content = f'**{respound.get("queue")}:**\n{fmt}'f'\n{more}' if more else f'**{respound.get("queue")}:**\n{fmt}'
@@ -329,215 +329,6 @@ class music(commands.Cog):
         self.bot = bot
         self.alonetime = bot.config.get('alonetime',0)
         self.nosongtime = bot.config.get('nosongtime',0)
-        self.replacer = "$^"
-        self.replacement = "."
-        self.sptf = spotipy.Spotify(
-            client_credentials_manager=SpotifyClientCredentials(
-                client_id=CLIENT_ID,
-                client_secret=CLIENT_SECRET,
-            )
-        )
-
-    # @commands.Cog.listener()
-    # async def on_message(self,message:discord.Message):
-    #     database = self.bot.mango['music_channel']
-    #     data = database.find_one({'guild_id':str(message.guild.id)})
-    #     if data:
-    #         if message.channel.id == int(data['channel_id']):
-    #             await message.delete()
-    #             target = await message.channel.fetch_message(data['message_id'])
-    #             # if await self.check_ban(message.author.id):
-    #             #     respound = get_respound(message.guild.preferred_locale, "baned")
-    #             #     embed = createembed.baned(interaction, interaction.client, respound)
-    #             #     d = await interaction.followup.send(embed=embed)
-    #             #     await asyncio.sleep(5)
-    #             #     await d.delete()
-    #             #     return
-            
-    #             # respound = get_respound(interaction.locale, "check_before_play")
-
-    #             if not message.author.voice:
-    #                 # embed = createembed.check_before_play(interaction, interaction.client, "usernotin", respound)
-    #                 # await interaction.followup.send(embed=embed)
-    #                 return
-                
-    #             elif not message.guild.voice_client:
-    #                 vc: wavelink.Player = await message.author.voice.channel.connect(cls=wavelink.Player)
-
-    #             elif message.guild.voice_client.channel != message.author.voice.channel:
-    #                 # embed = createembed.check_before_play(interaction, interaction.client, "diffchan", respound)
-    #                 # await interaction.followup.send(embed=embed)
-    #                 return
-                
-    #             else:
-    #                 vc: wavelink.Player = message.guild.voice_client
-
-    #             await message.guild.change_voice_state(channel=message.author.voice.channel, self_mute=False, self_deaf=True)
-    #             search = message.content
-    #             await self.statistic(search)
-
-    #             if not vc.playing and not vc.queue:
-    #                 setattr(vc, "np", target)
-    #                 setattr(vc, "loop", "False")
-    #                 setattr(vc, "task", None)
-    #                 setattr(vc, "Myview", None)
-    #                 setattr(vc, "interaction", message)
-    #                 pre = pr(message,nowplaying.np)
-    #                 pl = pp(message,nowplaying.np)
-    #                 loop = lo(message,nowplaying.np)
-    #                 skip = sk(message,nowplaying.np)
-    #                 # voldown = dw(interaction)
-    #                 # volup = uw(interaction)
-    #                 # clear = cl(interaction)
-    #                 auto = au(message,nowplaying.np)
-    #                 disconnect = dc(message,nowplaying.np)
-    #                 vc.Myview = View(timeout=None)
-    #                 vc.Myview.add_item(loop)
-    #                 vc.Myview.add_item(auto)
-    #                 vc.Myview.add_item(pre)
-    #                 vc.Myview.add_item(pl)
-    #                 vc.Myview.add_item(skip)
-    #                 # vc.Myview.add_item(voldown)
-    #                 # vc.Myview.add_item(volup)
-    #                 # vc.Myview.add_item(clear)
-    #                 vc.Myview.add_item(disconnect)
-
-    #             vc.autoplay = wavelink.AutoPlayMode.partial
-    #             # -------Lplaylist
-    #             if search == "Lplaylist":
-    #                 if await self.check_vip(message.author.id):
-    #                     database = self.bot.mango["lplaylist"]
-    #                     data = database.find_one({"user_id": str(message.author.id)})
-    #                     if not data:
-    #                         # respound = get_respound(message.guild.preferred_locale, "callback")
-    #                         # embed = createembed.playnolplaylist(interaction, self.bot, respound)
-    #                         # await interaction.followup.send(embed=embed)
-    #                         return
-
-    #                     first = None
-    #                     for title, uri in data["playlist"].items():
-    #                         source = await createsource.searchen(
-    #                             self,
-    #                             uri.replace(self.replacer, self.replacement),
-    #                             message.author,
-    #                         )
-    #                         if not first:
-    #                             first = source
-    #                         if not vc.queue and not vc.playing:
-    #                             await vc.queue.put_wait(source)
-    #                             await vc.play(await vc.queue.get_wait())
-    #                         else:
-    #                             await vc.queue.put_wait(source)
-    #                             await nowplaying.np3(self, message)
-    #                             print(f'adding Lplaylist {source}')
-    #                     # await self.addtoqueue(
-    #                     #     first, interaction,playlist_title='Lplaylist', playlist=True, number=len(data["playlist"])
-    #                     # )
-    #                     return
-    #                 else:
-    #                     respound = get_respound(message.guild.preferred_locale, "callback")
-    #                     # embed = createembed.noviplplaylist(interaction, self.bot, respound)
-    #                     # await interaction.followup.send(embed=embed)
-    #                     return
-    #             yt = False
-    #             if "onlytube" in search:
-    #                 yt = True
-    #                 search = search.replace("onlytube", "")
-    #             track = await createsource.searchen(self, search, message.author, onlyyt=yt)
-    #             if track == None:
-    #                 # embed = createembed.noresult(interaction, self.bot, respound)
-    #                 # await interaction.followup.send(embed=embed)
-    #                 print('track not found')
-    #                 return
-                
-    #             if not vc.playing and not vc.queue:
-    #                 await vc.queue.put_wait(track)
-    #                 await vc.set_volume(100)
-    #                 await vc.play(await vc.queue.get_wait())
-    #                 print(f"playing {vc.current} requested by {vc.current.extras.requester}")
-    #             else:
-    #                 await vc.queue.put_wait(track)
-    #                 print(f'adding {track}')
-    #                 # await self.addtoqueue(track, interaction)
-    #                 await nowplaying.np3(self, message)
-
-    @app_commands.command(
-        name="createmusicchannel",
-        description="create new music channel for songs",
-    )
-    async def create_music_channel(self, interaction: discord.Interaction,title:str):
-        await interaction.response.defer()
-        database = self.bot.mango['music_channel']
-        data = database.find_one({'guild_id':str(interaction.guild.id)})
-        if data:
-            try:
-               await interaction.guild.fetch_channel(int(data['channel_id']))
-               await interaction.followup.send("มีช่องเพลงอยู่เเล้ว")
-               return
-            except Exception as e :
-               logger.error(e)
-               database.delete_one({'guild_id':str(interaction.guild.id)})
-        text_channel = await interaction.guild.create_text_channel(name=title,category=interaction.channel.category)
-        npembed = discord.Embed(
-            title=f"LittLeBirDD Music  <a:blobdancee:969575788389220392>",
-            color=0xFFFFFF,
-        )
-        npembed.add_field(
-            name=f"ระยะเวลา", value=f"`0:00:00/0:00:00`"
-        )
-        npembed.set_footer(
-            text=f"Not Playing | 100% | LoopStatus:Disable | Autoplay:Disable"
-        )
-        # npembed.set_thumbnail(url=vc.current.artwork)
-        pre = pr(interaction)
-        pl = pp(interaction)
-        loop = lo(interaction)
-        skip = sk(interaction)
-        # voldown = dw(interaction)
-        # volup = uw(interaction)
-        # clear = cl(interaction)
-        auto = au(interaction)
-        Myview = View(timeout=None)
-        disconnect = dc(interaction)
-        Myview.add_item(loop)
-        Myview.add_item(auto)
-        Myview.add_item(pre)
-        Myview.add_item(pl)
-        Myview.add_item(skip)
-        # vc.Myview.add_item(voldown)
-        # vc.Myview.add_item(volup)
-        # vc.Myview.add_item(clear)
-        Myview.add_item(disconnect)
-        with io.BytesIO() as image_binary:
-            total = 100
-            progress = 0
-            w, h =  350, 10
-            r=3
-            length = (progress*w)/total
-            img = Image.new("RGBA", (w, h)) 
-            img1 = ImageDraw.Draw(img)   
-            img1.line(xy=(-1,5,350,5),fill ="white",width=2) 
-            img1.ellipse(xy=(length-r,5-r,length+r,5+r) ,fill='darkred')
-            img.save(image_binary,'PNG')
-            image_binary.seek(0)
-
-            file = discord.File(image_binary, filename="image.png")
-
-            npembed.set_image(url="attachment://image.png")
-            # vc.np = await vc.interaction.followup.send(content=content, embed=npembed,view=vc.Myview,file=file)
-         
-            np = await text_channel.send(content='ไม่มีเพลงในคิวเเล้ว',embed=npembed,file=file,view=Myview)
-            database.insert_one({
-            "guild_id":str(interaction.guild.id),
-            "channel_id":str(text_channel.id),
-            "message_id":str(np.id)
-                })
-                     
-    async def check_ban(self, v):
-        if self.bot.mango["ban"].find_one({"user_id": str(v)}):
-            return True
-        else:
-            return False
 
     async def cleanup(self, guild, frm):
         vc: wavelink.Player = guild.voice_client
@@ -585,65 +376,41 @@ class music(commands.Cog):
         await asyncio.sleep(5)
         await d.delete()
 
-    async def check_vip(self, v):
-        if self.bot.mango["vip"].find_one({"user_id": str(v)}):
-            return True
-        else:
-            return False
-
     @app_commands.command(name="nowplaying", description="Show current music")
     async def nowplaying(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_fail(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
+            try:
+                vc.task.cancel() # To prevent bot from send Nowplaying message twice
+            except:
+                pass
             await nowplaying.np(self, interaction, send=True)
-
+            vc.task = self.bot.loop.create_task(self.current_time(vc.interaction))
+            
     @app_commands.command(
         name="autoplay",
         description="when ran out of music bot will random music for you",
     )
     async def autoplay(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_fail(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
-        
-        
+        await interaction.response.defer()      
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
-            if await self.check_vip(interaction.user.id):
-                au = [x for x in vc.Myview.children if x.custom_id == "au"][0]
-                if vc.autoplay == wavelink.AutoPlayMode.partial:
-                    vc.autoplay = wavelink.AutoPlayMode.enabled
-                    au.style = discord.ButtonStyle.green
-                elif vc.autoplay == wavelink.AutoPlayMode.enabled:
-                    vc.autoplay = wavelink.AutoPlayMode.partial
-                    au.style = discord.ButtonStyle.gray
-                await nowplaying.np(self, interaction)
-                respound = get_respound(interaction.locale, "autoplay")
-                embed = createembed.embed_success(interaction, respound)
-                d = await interaction.followup.send(embed=embed)
-                await asyncio.sleep(5)
-                await d.delete()
-            else:
-                respound = get_respound(interaction.locale, "viponly")
-                embed = createembed.embed_fail(interaction, respound)
-                d = await interaction.followup.send(embed=embed)
-                await asyncio.sleep(5)
-                await d.delete()
+            au = [x for x in vc.Myview.children if x.custom_id == "au"][0]
+            if vc.autoplay == wavelink.AutoPlayMode.partial:
+                vc.autoplay = wavelink.AutoPlayMode.enabled
+                au.style = discord.ButtonStyle.green
+            elif vc.autoplay == wavelink.AutoPlayMode.enabled:
+                vc.autoplay = wavelink.AutoPlayMode.partial
+                au.style = discord.ButtonStyle.gray
+            await nowplaying.np(self, interaction)
+            respound = get_respound(interaction.locale, "autoplay")
+            embed = createembed.embed_success(interaction, respound)
+            d = await interaction.followup.send(embed=embed)
+            await asyncio.sleep(5)
+            await d.delete()
 
     def is_url(self,url):
         try:
@@ -651,119 +418,11 @@ class music(commands.Cog):
             return all([result.scheme, result.netloc])
         except ValueError:
             return False
-    
-    async def statistic(self, search):
-        search = search.replace(self.replacement, self.replacer)
-        if len(search) > 99:
-            return
-        
-        if self.is_url(search):
-            return
-        
-        database = self.bot.mango["searchstatistic2"]
-        data = database.find_one({"music": search})
-        if not data:
-            database.insert_one({"music": search, "times": 1})
-        else:
-            database.update_one({"music": search}, {"$inc": {"times": 1}})
-
-    # @app_commands.command(name="play_local", description="Play local audio file")
-    # @app_commands.describe(audio="Drop or brows file")
-    # async def play_local(
-    #     self, interaction: discord.Interaction, audio: discord.Attachment
-    # ):
-    #     await interaction.response.defer()
-    #     if await self.check_ban(interaction.user.id):
-    #         respound = get_respound(interaction.locale, "baned")
-    #         embed = createembed.baned(interaction, interaction.client, respound)
-    #         d = await interaction.followup.send(embed=embed)
-    #         await asyncio.sleep(5)
-    #         await d.delete()
-    #         return
-    #     respound = get_respound(interaction.locale, "check_before_play")
-    #     if not interaction.user.voice:
-    #         embed = createembed.check_before_play(
-    #             interaction, interaction.client, "usernotin", respound
-    #         )
-    #         await interaction.followup.send(embed=embed)
-    #         return
-    #     elif not interaction.guild.voice_client:
-    #         vc: wavelink.Player = await interaction.user.voice.channel.connect(
-    #             cls=wavelink.Player
-    #         )
-    #     elif interaction.guild.voice_client.channel != interaction.user.voice.channel:
-    #         embed = createembed.check_before_play(
-    #             interaction, interaction.client, "diffchan", respound
-    #         )
-    #         await interaction.followup.send(embed=embed)
-    #         return
-    #     else:
-    #         vc: wavelink.Player = interaction.guild.voice_client
-    #     await interaction.guild.change_voice_state(
-    #         channel=interaction.user.voice.channel, self_mute=False, self_deaf=True
-    #     )
-    #     if not vc.is_playing() and vc.queue.is_empty:
-    #         setattr(vc, "loading", None)
-    #         setattr(vc, "np", None)
-    #         setattr(vc, "loop", "False")
-    #         setattr(vc, "task", None)
-    #         setattr(vc, "nosong", None)
-    #         setattr(vc, "Myview", None)
-    #         setattr(vc, "autoplay", False)
-    #         setattr(vc, "interaction", interaction)
-    #         setattr(vc, "history_autoplay_track", [])
-    #         setattr(vc, "state", "normal")
-    #         pl = pp(interaction)
-    #         loop = lo(interaction)
-    #         skip = sk(interaction)
-    #         voldown = dw(interaction)
-    #         volup = uw(interaction)
-    #         clear = cl(interaction)
-    #         auto = au(interaction)
-    #         disconnect = dc(interaction)
-    #         vc.Myview = View(timeout=None)
-    #         vc.Myview.add_item(loop)
-    #         vc.Myview.add_item(auto)
-    #         vc.Myview.add_item(pl)
-    #         vc.Myview.add_item(skip)
-    #         vc.Myview.add_item(voldown)
-    #         vc.Myview.add_item(volup)
-    #         vc.Myview.add_item(clear)
-    #         vc.Myview.add_item(disconnect)
-    #     vc.interaction = interaction
-    #     basename = "audio"
-    #     suffix = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
-    #     filename = "_".join([basename, suffix])
-    #     path = f"{os.getcwd()}\cf\\{filename}.wav"
-    #     await audio.save(path)
-    #     result = await wavelink.LocalTrack.search(path, return_first=True)
-    #     result.title = audio.filename
-    #     track = {
-    #         "song": result,
-    #         "requester": interaction.user,
-    #         "source": "Local track",
-    #         "path": path,
-    #     }
-    #     if not vc.is_playing() and vc.queue.is_empty:
-    #         await vc.queue.put_wait(track)
-    #         await vc.set_volume(100)
-    #         await vc.play(vc.queue[0]["song"], populate=True)
-    #     else:
-    #         await vc.queue.put_wait(track)
-    #         await self.addtoqueue(track, interaction)
 
     @app_commands.command(name="play", description="play music")
     @app_commands.describe(search="Music name")
     async def play(self, interaction: discord.Interaction, search: str):
         await interaction.response.defer()
-
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_fail(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
         
         respound = get_respound(interaction.locale, "check_before_play")
         if not interaction.user.voice:
@@ -783,9 +442,6 @@ class music(commands.Cog):
             vc: wavelink.Player = interaction.guild.voice_client
 
         await interaction.guild.change_voice_state(channel=interaction.user.voice.channel, self_mute=False, self_deaf=True)
-
-        await self.statistic(search)
-
         if not vc.playing and not vc.queue:
             setattr(vc, "np", None)
             setattr(vc, "loop", "False")
@@ -814,41 +470,6 @@ class music(commands.Cog):
             vc.autoplay = wavelink.AutoPlayMode.partial
 
         vc.interaction = interaction
-        # -------Lplaylist
-        if search == "Lplaylist":
-            if await self.check_vip(interaction.user.id):
-                database = self.bot.mango["lplaylist"]
-                data = database.find_one({"user_id": str(interaction.user.id)})
-                if not data:
-                    respound = get_respound(interaction.locale, "playnolplaylist")
-                    embed = createembed.embed_fail(interaction, respound)
-                    await interaction.followup.send(embed=embed)
-                    return
-                first = None
-                for title, uri in data["playlist"].items():
-                    source = await createsource.searchen(
-                        self,
-                        uri.replace(self.replacer, self.replacement),
-                        interaction.user,
-                    )
-                    if not first:
-                        first = source
-                    if not vc.queue and not vc.playing:
-                        await vc.queue.put_wait(source)
-                        await vc.play(await vc.queue.get_wait())
-                    else:
-                        await vc.queue.put_wait(source)
-                        await nowplaying.np(self, interaction)
-                        logger.info(f'adding Lplaylist {source}')
-                await self.addtoqueue(
-                    first, interaction,playlist_title='Lplaylist', playlist=True, number=len(data["playlist"])
-                )
-                return
-            else:
-                respound = get_respound(interaction.locale, "viponly")
-                embed = createembed.embed_fail(interaction, respound)
-                await interaction.followup.send(embed=embed)
-                return
         yt = False
         if "onlytube" in search:
             yt = True
@@ -864,32 +485,11 @@ class music(commands.Cog):
             await vc.queue.put_wait(track)
             await vc.set_volume(100)
             await vc.play(await vc.queue.get_wait(),populate=True)
-            logger.info(f"playing {vc.current} requested by {vc.current.extras.requester}")
         else:
             await vc.queue.put_wait(track)
             logger.info(f'adding {track}')
             await self.addtoqueue(track, interaction)
             await nowplaying.np(self, interaction)
-
-    # @play.autocomplete('search')
-    # async def fruits_autocomplete(self,interaction: discord.Interaction,current: str,) -> List[app_commands.Choice[str]]:
-    #     if len(current) == 0:
-    #       alphabet = "abcdefghijklmnopqrstuvwxyzกขคตงจฉชซณญพรสวงฬฒฮผอป"
-    #       current = random.choice(alphabet)
-    #     result = await wavelink.YouTubeMusicTrack.search(current)
-    #     return [app_commands.Choice(name=l.title, value=current)for l in result if current.lower() in l.title.lower()]
-
-    @play.autocomplete("search")
-    async def fruits_autocomplete(
-        self,
-        interaction,
-        current: str,
-    ) -> List[app_commands.Choice[str]]:
-        database = self.bot.mango["searchstatistic2"]
-        source = database.find().sort("times", -1).limit(3)
-        if len(current) > 0:
-            source = database.find({"music": {"$regex": current,'$options' : 'i'}}).limit(25)
-        return [app_commands.Choice(name=l["music"].replace(self.replacer, self.replacement),value=l["music"].replace(self.replacer, self.replacement))for l in source]
 
     def convert(self, seconds):
         seconds = seconds % (24 * 3600)
@@ -936,44 +536,29 @@ class music(commands.Cog):
             await asyncio.sleep(5)
             await d.delete()
 
-    async def current_time(self, interaction):
-        vc: wavelink.Player = interaction.guild.voice_client
+    async def current_time(self, interaction:discord.Interaction):
         while True:
+            vc: wavelink.Player = interaction.guild.voice_client
+            if interaction.is_expired():
+                try:
+                    vc.task.cancel()
+                except:pass
+            elif not interaction.is_expired() and vc.task.cancelled(): # resume update nowplaying after get new interaction
+                vc.task = self.bot.loop.create_task(self.current_time(vc.interaction))
             try:
-                vc: wavelink.Player = vc.interaction.guild.voice_client
                 np = await nowplaying.np(self,interaction)
-                setattr(self.bot, "inter", interaction)
-                setattr(self.bot, "re_np", np)
-                await asyncio.sleep(9)
-                if vc == None:
-                    break
-                if vc.np == None:
-                    break
-            except Exception as e:
-                pass
+            except discord.errors.NotFound as e:
+                break
+            if vc == None:
+                break
+            if vc.np == None:
+                break
+            setattr(self.bot, "inter", interaction)
+            setattr(self.bot, "re_np", np)
+            await asyncio.sleep(9)
             await asyncio.sleep(1)
-
-    # --------------------------------
-
-    async def corrected_song_name(self, title: str) -> str:
-        st = self.bot.last.search_for_track("", title)
-        searchtrack = st.get_next_page()
-        if searchtrack:
-            track = searchtrack[0]
-            result = f"{track.title} - {track.artist} "
-            logger.info(f"last.fm | {title} -> {result}")
-        else:
-            corrected_title = self.sptf.search(q=title, type="track", limit=1)[
-                "tracks"
-            ]["items"]
-            if corrected_title:
-                track = corrected_title[0]
-                result = f"{track['name']} - {track['artists'][0]['name']}"
-                logger.info(f"spotify | {title} -> {result}")
-            else:
-                result = None
-        return result
-
+        vc.task.cancel()
+  
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, payload:wavelink.payloads.TrackStartEventPayload):
         vc: wavelink.Player = payload.player
@@ -1014,153 +599,7 @@ class music(commands.Cog):
                 except:
                     pass
                 return
-        # if vc == None:
-        #     return
-        # if vc.state == "disconnect":
-        #     return
-        # respound = get_respound(interaction.locale, "on_wavelink_track_end")
-        # try:
-        #     if vc.queue[0].get("path", None) != None:
-        #         os.remove(vc.queue[0]["path"])
-        # except:
-        #     pass
-        # if vc:
-        #     try:
-        #         recent_song = vc.queue[0]
-        #     except:
-        #         recent_song = None
-        #     vc.task.cancel()
-        #     await asyncio.sleep(0.2)
-        #     try:
-        #         await vc.np.delete()
-        #     except:
-        #         pass
-        #     vc.np = None
-        #     if not vc.queue.is_empty:
-        #         if vc.loop == "False":
-        #             del vc.queue[0]
-        #         elif vc.loop == "Song":
-        #             pass
-        #         elif vc.loop == "Queue":
-        #             get = vc.queue[0]
-        #             del vc.queue[0]
-        #             await vc.queue.put_wait(get)
-
-        #     if vc.queue.is_empty:
-        #         if vc.autoplay:
-        #             next_auto = None
-        #             search = recent_song["song"].title
-        #             if recent_song["artist"]:
-        #                 search = f"{search} - {recent_song['artist']}"
-        #             corrected_name = await self.corrected_song_name(search)
-        #             tracks = None
-        #             if corrected_name:
-        #                 searchtrack = self.bot.last.search_for_track(
-        #                     "", corrected_name
-        #                 ).get_next_page()
-        #                 if searchtrack:
-        #                     tracks = searchtrack[0]
-        #                     similar = tracks.get_similar(limit=15)
-        #                     if similar:
-        #                         rand = random.choice(similar).item
-        #                         engine = "last.fm"
-        #                         next_auto = f"{rand.title} - {rand.artist.name}"
-        #                         next_artist = rand.artist.name
-
-        #             if next_auto == None and tracks != None:
-        #                 searchart = self.bot.last.get_artist(tracks.artist)
-        #                 similar: list = searchart.get_top_tracks(limit=7)
-        #                 times = 0
-        #                 while times <= 50:
-        #                     if not similar:
-        #                         break
-        #                     rand = random.choice(similar)
-        #                     if rand.item != tracks:
-        #                         if (
-        #                             f"{rand.item.title} - {rand.item.artist}"
-        #                             not in vc.history_autoplay_track
-        #                         ):
-        #                             next_auto = (
-        #                                 f"{rand.item.title} - {rand.item.artist.name}"
-        #                             )
-        #                             next_artist = rand.item.artist.name
-        #                             engine = "last.fm (artist)"
-        #                             vc.history_autoplay_track.append(next_auto)
-        #                             break
-        #                     times += 1
-
-        #             if next_auto == None:
-        #                 results = self.sptf.search(
-        #                     q=corrected_name, type="track", limit=10
-        #                 )
-        #                 if results["tracks"]["total"] != 0:
-        #                     track = results["tracks"]["items"][0]
-        #                     track_url = results["tracks"]["items"][0]["external_urls"][
-        #                         "spotify"
-        #                     ]
-        #                     artist_url = results["tracks"]["items"][0]["artists"][0][
-        #                         "external_urls"
-        #                     ]["spotify"]
-        #                     similar_tracks = self.sptf.recommendations(
-        #                         seed_tracks=[track_url],
-        #                         seed_artists=[artist_url],
-        #                         limit=10,
-        #                     )
-        #                     # for i, track in enumerate(similar_tracks['tracks'], start=1):
-        #                     #   print(f"{i}. {track['name']} - {track['artists'][0]['name']} {track['external_urls']['spotify']}")
-        #                     if similar_tracks:
-        #                         rand = random.choice(similar_tracks["tracks"])
-        #                         engine = "spotify recommendations"
-        #                         next_artist = rand["artists"][0]["name"]
-        #                         next_auto = f"{rand['name']} - {next_artist}"
-
-        #             if next_auto == None:
-        #                 lang = [None, "Thai"]
-        #                 l = random.choice(lang)
-        #                 random_song = None
-        #                 while random_song is None:
-        #                     try:
-        #                         random_song = get_random(
-        #                             spotify=self.bot.spotify_client,
-        #                             year="2020-2022",
-        #                             limit=20,
-        #                             offset_max=50,
-        #                             type="track",
-        #                             genre=l,
-        #                         )
-        #                     except:
-        #                         pass
-        #                 engine = "Random alphabet"
-        #                 next_auto = random_song["external_urls"]["spotify"]
-        #                 next_artist = random_song["artists"][0]["name"]
-
-        #             print(f"next music : {next_auto} ({engine})")
-        #             print("---------------------------------------------")
-        #             track = await createsource.searchen(
-        #                 self, next_auto, self.bot, next_artist
-        #             )
-        #             await vc.queue.put_wait(track)
-        #     if not vc.queue.is_empty:
-        #         await vc.play(vc.queue[0]["song"])
-        #         await nowplaying.np(self, vc.interaction)
-        #         vc.task = self.bot.loop.create_task(self.current_time(interaction))
-        #     if vc.queue.is_empty:
-        #         try:
-        #             async with timeout(self.nosongtime):
-        #                 await self.nosong(interaction)
-        #         except:
-        #             await self.cleanup(interaction.guild, "trackend")
-        #             embed = createembed.on_wavelink_track_end(
-        #                 vc.interaction, self.bot, respound
-        #             )
-        #             try:
-        #                 d = await interaction.followup.send(embed=embed)
-        #                 await asyncio.sleep(5)
-        #                 await d.delete()
-        #             except:
-        #                 pass
-        #             return
-
+            
     async def nosong(self, interaction:discord.Interaction):
         i=0
         while True:
@@ -1182,13 +621,6 @@ class music(commands.Cog):
     )
     async def loop(self, interaction: discord.Interaction, status: str):
         await interaction.response.defer()
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_fail(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
@@ -1210,13 +642,6 @@ class music(commands.Cog):
     @app_commands.command(name="resume", description="Resume music")
     async def resume(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_fail(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
@@ -1233,13 +658,6 @@ class music(commands.Cog):
     @app_commands.command(name="pause", description="Pause music")
     async def pause(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_fail(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
         respound = get_respound(interaction.locale, "pause")
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
@@ -1259,13 +677,6 @@ class music(commands.Cog):
     @app_commands.describe(to="Skip to given music")
     async def skip(self, interaction: discord.Interaction, to: Optional[int] = False):
         await interaction.response.defer()
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_fail(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
@@ -1295,13 +706,6 @@ class music(commands.Cog):
     async def shuffle(self, interaction: discord.Interaction):
         await interaction.response.defer()
         vc: wavelink.Player = interaction.guild.voice_client
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_success(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
@@ -1317,13 +721,6 @@ class music(commands.Cog):
         vc: wavelink.Player = interaction.guild.voice_client
         vc.interaction = interaction
         await interaction.response.defer()
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_fail(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
@@ -1338,13 +735,6 @@ class music(commands.Cog):
     @app_commands.describe(index="Music Sequence")
     async def remove(self, interaction: discord.Interaction, index: int):
         await interaction.response.defer()
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_fail(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
@@ -1376,13 +766,6 @@ class music(commands.Cog):
     @app_commands.command(name="queue", description="Send queuelist")
     async def queueList(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        if await self.check_ban(interaction.user.id):
-            respound = get_respound(interaction.locale, "baned")
-            embed = createembed.embed_fail(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
-            return
         if await self.check_before_play(interaction):
             pag = []
             respound = get_respound(interaction.locale, "queueList")
@@ -1457,58 +840,6 @@ class music(commands.Cog):
             if len(vc.channel.members) > 1:
                 break
             await asyncio.sleep(0.5)
-
-    # @app_commands.command(name="filters", description="Modify music with filters")
-    # @app_commands.choices(
-    #     type=[
-    #         Choice(name="Bassboost (เร่งเบส)", value="Bassboost"),
-    #         Choice(name="Piano", value="Piano"),
-    #         Choice(name="8D ", value="Rotation"),
-    #         Choice(name="Speed up (เพิ่มความเร็ว)", value="Increasespeed"),
-    #         Choice(name="Speed Down (ลดความเร็ว)", value="Decreasespeed"),
-    #         Choice(name="Reset (รีเซ็ต)", value="Reset"),
-    #     ]
-    # )
-    # async def filters(self, interaction: discord.Interaction, type: str):
-    #     await interaction.response.defer()
-    #     if await self.check_ban(interaction.user.id):
-    #         respound = get_respound(interaction.locale, "baned")
-    #         embed = createembed.baned(interaction, interaction.client, respound)
-    #         d = await interaction.followup.send(embed=embed)
-    #         await asyncio.sleep(5)
-    #         await d.delete()
-    #         return
-    #     if await self.check_before_play(interaction):
-    #         respound = get_respound(interaction.locale, "filters")
-    #         vc: wavelink.Player = interaction.guild.voice_client
-    #         if type == "Bassboost":
-    #             fil = wavelink.Filters()
-    #             fil.
-    #             await vc.set_filters(
-                    
-    #             )
-    #         if type == "Piano":
-    #             await vc.set_filter(
-    #                 wavelink.Filter(equalizer=wavelink.Equalizer.piano())
-    #             )
-    #         if type == "Increasespeed":
-    #             await vc.set_filter(
-    #                 wavelink.Filter(timescale=wavelink.Timescale(speed=1.10))
-    #             )
-    #         if type == "Decreasespeed":
-    #             await vc.set_filter(
-    #                 wavelink.Filter(timescale=wavelink.Timescale(speed=0.90))
-    #             )
-    #         if type == "Rotation":
-    #             await vc.set_filter(wavelink.Filter(rotation=wavelink.Rotation(0.12)))
-    #         if type == "Reset":
-    #             await vc.set_filter(
-    #                 wavelink.Filter(equalizer=wavelink.Equalizer.flat())
-    #             )
-    #         embed = createembed.filters(interaction, self.bot, respound, type=type)
-    #         d = await interaction.followup.send(embed=embed)
-    #         await asyncio.sleep(5)
-    #         await d.delete()
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before, after):

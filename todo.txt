@@ -1,0 +1,5 @@
+nowplaying function
+
+nowplaying class where vc.paused
+
+current_time function
