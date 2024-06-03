@@ -21,7 +21,7 @@ from logging.handlers import TimedRotatingFileHandler
 import winsound
 
 logger = logging.getLogger('littlebirdd')
-from config import CONFIG,TOKEN,APPLICATION_ID
+from config import CONFIG,TOKEN,APPLICATION_ID,LOCAL_LAVALINK
 
 close_by_cooling = False
 intents = discord.Intents.all()
@@ -48,10 +48,13 @@ class Musicbot(commands.Bot):
 bot = Musicbot()
 
 async def node_connect(): 
-    node1 = wavelink.Node(uri ='http://n1.ll.darrennathanael.com:2269', password="glasshost1984") # prefered Lavalink server
-    # node2 = wavelink.Node(uri ='http://lavalink.rudracloud.com:2333', password="RudraCloud.com") # reserve Lavalink server
-    # node3 = wavelink.Node(uri ='http:/localhost:2333', password="youshallnotpass") # Local Lavalink server
-    await wavelink.Pool.connect(client=bot, nodes=[node1])
+    if LOCAL_LAVALINK:
+        logger.info("using Local Lavalink")
+        node = wavelink.Node(uri ='http://localhost:2333', password="youshallnotpass") # Local Lavalink server
+    else:
+        node = wavelink.Node(uri ='http://n1.ll.darrennathanael.com:2269', password="glasshost1984") # prefered Lavalink server
+        # node2 = wavelink.Node(uri ='http://lavalink.rudracloud.com:2333', password="RudraCloud.com") # reserve Lavalink server
+    await wavelink.Pool.connect(client=bot, nodes=[node])
 
 
 @bot.event

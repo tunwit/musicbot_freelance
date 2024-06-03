@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import logging
 import os
 import sqlite3
+import requests
 
 logger = logging.getLogger('littlebirdd')
 
@@ -25,8 +26,9 @@ connection.execute('''
         );
         ''')
 connection.commit()
-
+LOCAL_LAVALINK = config['local_lavalink']
 CONFIG = config
 TOKEN = os.getenv('TOKEN')
 APPLICATION_ID = os.getenv('APPLICATION_ID')
 DATABASE = connection
+
