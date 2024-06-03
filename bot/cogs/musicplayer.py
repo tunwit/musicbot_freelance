@@ -28,9 +28,9 @@ from urllib.parse import urlparse
 from PIL import Image, ImageDraw 
 import io
 import logging
-from config import CLIENT_ID,CLIENT_SECRET
 import sys
 logger = logging.getLogger('littlebirdd')
+from config import DATABASE
 
 def unhandle_exception(exc_type, exc_value, exc_traceback):
     logger = logging.getLogger('littlebirdd')
@@ -322,6 +322,23 @@ class music(commands.Cog):
         except ValueError:
             return False
 
+    async def statistic(self, search):
+        if len(search) > 99:
+            return
+        
+        if self.is_url(search):
+            return
+        cursor = DATABASE.cursor()
+        data = cursor.execute("SELECT * FROM search_history WHERE music = ?",(search,))
+        result = data.fetchall()
+        if not result:
+            print('no data')
+            cursor.execute("INSERT INTO search_history (music,times) VALUES (?,?)",(search,1,))
+        else:
+            cursor.execute("UPDATE search_history SET times = times + 1 WHERE music = ?",(search,))
+        DATABASE.commit()
+        cursor.close()
+
     @app_commands.command(name="play", description="play music")
     @app_commands.describe(search="Music name")
     async def play(self, interaction: discord.Interaction, search: str):
@@ -345,6 +362,8 @@ class music(commands.Cog):
             vc: wavelink.Player = interaction.guild.voice_client
 
         await interaction.guild.change_voice_state(channel=interaction.user.voice.channel, self_mute=False, self_deaf=True)
+        
+        await self.statistic(search)
         if not vc.playing and not vc.queue:
             setattr(vc, "np", None)
             setattr(vc, "loop", "False")
@@ -394,6 +413,23 @@ class music(commands.Cog):
             await self.addtoqueue(track, interaction)
             await nowplaying.np(self, interaction)
 
+    @play.autocomplete("search")
+    async def play_autocomplete(
+        self,
+        interaction,
+        current: str,
+    ) -> List[app_commands.Choice[str]]:
+        cursor = DATABASE.cursor()
+        
+        source = cursor.execute("SELECT * FROM search_history ORDER BY times DESC LIMIT 3")
+
+        if len(current) > 0:
+            source = cursor.execute("SELECT * FROM search_history WHERE music LIKE ? COLLATE NOCASE LIMIT 25",(f"%{current}%",))
+        
+        result = [app_commands.Choice(name = l[1],value=l[1]) for l in source]
+        cursor.close()
+        return result
+    
     def convert(self, seconds):
         seconds = seconds % (24 * 3600)
         hour = seconds // 3600
