@@ -441,6 +441,9 @@ class music(commands.Cog):
 
     async def current_time(self, interaction:discord.Interaction):
         vc: wavelink.Player = interaction.guild.voice_client
+        try:
+            await vc.np.delete()
+        except:pass
         vc.np = None
         while True:
             vc: wavelink.Player = interaction.guild.voice_client

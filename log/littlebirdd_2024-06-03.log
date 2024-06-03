@@ -1,8 +1,0 @@
-2024-06-03 18:23:53 CRITICAL     Uncaught exception
-Traceback (most recent call last):
-  File "d:\project\musicbot_freelance\bot\main.py", line 24, in <module>
-    from config import CONFIG,MODEL,TOKEN,APPLICATION_ID
-  File "d:\project\musicbot_freelance\bot\config.py", line 11, in <module>
-    with open(f"{parent}\\_config.json", "r") as f:
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: 'D:\\project\\_config.json'
