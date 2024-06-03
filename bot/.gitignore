@@ -7,3 +7,4 @@ log/
 moonlit-poetry-378910-6523bdf8fae3.json
 python-3.11.8-amd64.exe
 *.db
+test*
