@@ -9,8 +9,8 @@ import sys
 import winsound
 import time
 
-BOT_SCRIPT = 'bot\main.py'
-img=Image.open('profile\default.png').convert("RGB")
+BOT_SCRIPT = 'main.py'
+img=Image.open('profile.png').convert("RGB")
 npImage=np.array(img)
 h,w=img.size
 
@@ -36,7 +36,7 @@ def handleclick(icon,event):
             bot_thread.terminate()
         icon.stop()
     elif str(event) == "Start":
-        bot_thread = subprocess.Popen([sys.executable, BOT_SCRIPT])
+        bot_thread = subprocess.Popen([sys.executable, BOT_SCRIPT],cwd='bot')
         icon.menu = started_menu
         winsound.PlaySound('bot\\audio\\starting.wav',winsound.SND_FILENAME)
     elif str(event) == "Close":
@@ -46,7 +46,7 @@ def handleclick(icon,event):
     elif str(event) == "Restart":
         bot_thread.terminate()
         time.sleep(1) #wait to make sure
-        bot_thread = subprocess.Popen([sys.executable, BOT_SCRIPT])
+        bot_thread = subprocess.Popen([sys.executable, BOT_SCRIPT],cwd='bot')
         icon.menu = started_menu
         winsound.PlaySound('bot\\audio\\restarting.wav',winsound.SND_FILENAME)
         

@@ -117,8 +117,8 @@ class nowplaying:
                         text=f"{'Paused'if vc.paused else 'Playing'} | {vc.volume}% | LoopStatus:{trans_queueMode[f'wavelink.{str(vc.queue.mode)}']} | Autoplay:{trans_autoMode[f'wavelink.{str(vc.autoplay)}']}"
                     )
                     npembed.set_image(url=vc.current.artwork)
-                    more = f"`{respound.get('andmore').format(more=len(vc.queue)-4)}`"
-                    if len(vc.queue) - 4 <= 0:
+                    more = f"`{respound.get('andmore').format(more=len(lst)-4)}`"
+                    if len(lst) - 4 <= 0:
                         more = None
                     if len(fmt) == 0:
                         fmt = f"`{respound.get('fmt')}`"
@@ -190,8 +190,8 @@ class nowplaying:
                         text=f"{'Paused'if vc.paused else 'Playing'} | {vc.volume}% | LoopStatus:{trans_queueMode[f'wavelink.{str(vc.queue.mode)}']} | Autoplay:{trans_autoMode[f'wavelink.{str(vc.autoplay)}']}"
                     )
                     npembed.set_thumbnail(url=vc.current.artwork)
-                    more = f"`{respound.get('andmore').format(more=len(vc.queue)-4)}`"
-                    if len(vc.queue) - 4 <= 0:
+                    more = f"`{respound.get('andmore').format(more=len(lst)-4)}`"
+                    if len(lst) - 4 <= 0:
                         more = None
                     if len(fmt) == 0:
                         fmt = f"`{respound.get('fmt')}`"
@@ -290,7 +290,6 @@ class music(commands.Cog):
                 vc.task.cancel() # To prevent bot from send Nowplaying message twice
             except:
                 pass
-            await nowplaying.np(self, interaction, send=True)
             vc.task = self.bot.loop.create_task(self.current_time(vc.interaction))
             
     @app_commands.command(
@@ -643,12 +642,25 @@ class music(commands.Cog):
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
-            delete = None
+            delete = None 
             if vc.queue.mode == wavelink.QueueMode.loop_all:
-                if index >len(vc.queue):
+                if index > (vc.queue.count+vc.queue.history.count):#Index out of range handler
+                    respound = get_respound(interaction.locale, "remove")
+                    erembed = createembed.embed_fail(interaction, respound)
+                    await interaction.followup.send(embed=erembed)
+                    return
+                if index > vc.queue.count: 
                     delete = vc.queue.history.peek(index-len(vc.queue)-1)
                     vc.queue.history.delete(index-len(vc.queue)-1)
+                else:
+                    delete = vc.queue.peek(index-1)
+                    vc.queue.delete(index-1)
             else:
+                if index > vc.queue.count: #Index out of range handler
+                    respound = get_respound(interaction.locale, "remove")
+                    erembed = createembed.embed_fail(interaction, respound)
+                    await interaction.followup.send(embed=erembed)
+                    return
                 delete = vc.queue.peek(index-1)
                 vc.queue.delete(index-1)
             respound = get_respound(interaction.locale, "remove")
@@ -657,16 +669,6 @@ class music(commands.Cog):
             await asyncio.sleep(5)
             await d.delete()
             await nowplaying.np(self, interaction)
-
-    @remove.error
-    async def remove_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandInvokeError):
-            await interaction.response.defer()
-            respound = get_respound(interaction.locale, "remove")
-            erembed = createembed.embed_fail(interaction, respound)
-            await interaction.followup.send(embed=erembed)
 
     @app_commands.command(name="queue", description="Send queuelist")
     async def queueList(self, interaction: discord.Interaction):

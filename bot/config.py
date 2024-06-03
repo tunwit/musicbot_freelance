@@ -3,25 +3,19 @@ from dotenv import load_dotenv
 import logging
 import os
 
-parent = os.path.dirname(os.getcwd())
-
 logger = logging.getLogger('littlebirdd')
 
-with open(f"{parent}\_config.json", "r") as f:
+path = os.getcwd()
+parent = os.path.abspath(os.path.join(path, os.pardir))
+
+with open(f"{parent}\\_config.json", "r") as f:
     config = json.load(f)
 
-MODEL = config["model"]  # test for LittlePonYY | main for LittLeBirDD
 
-if MODEL == 'main':
-    load_dotenv('.env.production')
-    logger.info('Load new .env.production')
-elif MODEL == 'test':
-    load_dotenv('.env.development')
-    logger.info('Load new .env.development')
-else:
-    raise 'Unvalid bot MODEL'
+load_dotenv('.env.development')
+logger.info('Load new .env.development')
 
-CONFIG = config[MODEL] 
+CONFIG = config
 TOKEN = os.getenv('TOKEN')
 APPLICATION_ID = os.getenv('APPLICATION_ID')
 CLIENT_ID = os.getenv('CLIENT_ID')

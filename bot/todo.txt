@@ -3,3 +3,9 @@ nowplaying function
 nowplaying class where vc.paused
 
 current_time function
+
+remove commands bug fix
+
+on_timeout buttin bug fix
+
+nowplaying more not appear
