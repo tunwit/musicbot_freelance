@@ -1,6 +1,5 @@
 import logsetup #essential
 import logging
-
 from discord.ext import commands,tasks
 import json
 import os
@@ -68,5 +67,3 @@ async def on_wavelink_node_ready(node: wavelink.NodeReadyEventPayload):
     logger.info(f"Wavelink {node.node.identifier} connected")
 
 bot.run(TOKEN,log_level=logging.ERROR)
-
-print("Hello")
