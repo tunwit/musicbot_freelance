@@ -4,6 +4,8 @@ import logging
 import os
 import sqlite3
 import requests
+import sys
+
 
 logger = logging.getLogger('littlebirdd')
 
@@ -27,6 +29,20 @@ connection.execute('''
         ''')
 connection.commit()
 LOCAL_LAVALINK = config['local_lavalink']
+if LOCAL_LAVALINK:
+    if not os.path.isfile(f"{parent}\\bot\\lavalink\\lavalink.jar"):
+        try:
+            logger.info('Downloading Lavalink.jar.')
+            response = requests.get('https://github.com/lavalink-devs/Lavalink/releases/download/4.0.5/Lavalink.jar', stream=True)
+            response.raise_for_status()
+            with open(f"{parent}\\bot\\lavalink\\lavalink.jar", 'wb') as file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    file.write(chunk)
+            logger.info('Lavalink success fully dowloaded')        
+        except requests.exceptions.RequestException as e:
+            logger.info(f'Fail to dowload Lavalike due to \n{e}')  
+            sys.exit()
+
 CONFIG = config
 TOKEN = os.getenv('TOKEN')
 APPLICATION_ID = os.getenv('APPLICATION_ID')

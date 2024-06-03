@@ -49,7 +49,6 @@ bot = Musicbot()
 
 async def node_connect(): 
     if LOCAL_LAVALINK:
-        logger.info("using Local Lavalink")
         node = wavelink.Node(uri ='http://localhost:2333', password="youshallnotpass") # Local Lavalink server
     else:
         node = wavelink.Node(uri ='http://n1.ll.darrennathanael.com:2269', password="glasshost1984") # prefered Lavalink server
