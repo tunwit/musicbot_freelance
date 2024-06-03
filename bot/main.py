@@ -21,7 +21,7 @@ from logging.handlers import TimedRotatingFileHandler
 import winsound
 
 logger = logging.getLogger('littlebirdd')
-from config import CONFIG,MODEL,TOKEN,APPLICATION_ID,MONGO,CLIENT_ID,CLIENT_SECRET,LAST_API_KEY,LAST_API_SECRET,LAST_USERNAME,LAST_PASSWORD
+from config import CONFIG,MODEL,TOKEN,APPLICATION_ID
 
 close_by_cooling = False
 intents = discord.Intents.all()
