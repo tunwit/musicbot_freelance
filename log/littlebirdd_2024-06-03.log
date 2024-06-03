@@ -1,0 +1,92 @@
+2024-06-03 17:05:17 INFO     Load new .env.development
+2024-06-03 17:05:17 CRITICAL     Uncaught exception
+Traceback (most recent call last):
+  File "d:\project\musicbot_freelance\bot\main.py", line 71, in <module>
+    bot.run(TOKEN,log_level=logging.ERROR)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 860, in run
+    asyncio.run(runner())
+  File "C:\Python3.11\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\asyncio\base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 849, in runner
+    await self.start(token, reconnect=reconnect)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 777, in start
+    await self.login(token)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 609, in login
+    raise TypeError(f'expected token to be a str, received {token.__class__.__name__} instead')
+TypeError: expected token to be a str, received NoneType instead
+2024-06-03 17:10:47 INFO     Load new .env.development
+2024-06-03 17:10:47 CRITICAL     Uncaught exception
+Traceback (most recent call last):
+  File "d:\project\musicbot_freelance\bot\main.py", line 71, in <module>
+    bot.run(TOKEN,log_level=logging.ERROR)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 860, in run
+    asyncio.run(runner())
+  File "C:\Python3.11\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\asyncio\base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 849, in runner
+    await self.start(token, reconnect=reconnect)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 777, in start
+    await self.login(token)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 609, in login
+    raise TypeError(f'expected token to be a str, received {token.__class__.__name__} instead')
+TypeError: expected token to be a str, received NoneType instead
+2024-06-03 17:11:25 INFO     Load new .env.development
+2024-06-03 17:11:25 CRITICAL     Uncaught exception
+Traceback (most recent call last):
+  File "d:\project\musicbot_freelance\bot\main.py", line 71, in <module>
+    bot.run(TOKEN,log_level=logging.ERROR)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 860, in run
+    asyncio.run(runner())
+  File "C:\Python3.11\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\asyncio\base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 849, in runner
+    await self.start(token, reconnect=reconnect)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 777, in start
+    await self.login(token)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 609, in login
+    raise TypeError(f'expected token to be a str, received {token.__class__.__name__} instead')
+TypeError: expected token to be a str, received NoneType instead
+2024-06-03 17:11:52 INFO     Load new .env.development
+2024-06-03 17:11:52 CRITICAL     Uncaught exception
+Traceback (most recent call last):
+  File "d:\project\musicbot_freelance\bot\main.py", line 71, in <module>
+    bot.run(TOKEN,log_level=logging.ERROR)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 860, in run
+    asyncio.run(runner())
+  File "C:\Python3.11\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\asyncio\base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 849, in runner
+    await self.start(token, reconnect=reconnect)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 777, in start
+    await self.login(token)
+  File "C:\Python3.11\Lib\site-packages\discord\client.py", line 609, in login
+    raise TypeError(f'expected token to be a str, received {token.__class__.__name__} instead')
+TypeError: expected token to be a str, received NoneType instead

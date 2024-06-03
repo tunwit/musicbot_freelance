@@ -3,8 +3,11 @@ from dotenv import load_dotenv
 import logging
 import os
 
+parent = os.path.dirname(os.getcwd())
+
 logger = logging.getLogger('littlebirdd')
-with open("_config.json", "r") as f:
+
+with open(f"{parent}\_config.json", "r") as f:
     config = json.load(f)
 
 MODEL = config["model"]  # test for LittlePonYY | main for LittLeBirDD

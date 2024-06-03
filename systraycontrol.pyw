@@ -9,7 +9,7 @@ import sys
 import winsound
 import time
 
-BOT_SCRIPT = 'main.py'
+BOT_SCRIPT = 'bot\main.py'
 img=Image.open('profile\default.png').convert("RGB")
 npImage=np.array(img)
 h,w=img.size
@@ -38,17 +38,17 @@ def handleclick(icon,event):
     elif str(event) == "Start":
         bot_thread = subprocess.Popen([sys.executable, BOT_SCRIPT])
         icon.menu = started_menu
-        winsound.PlaySound('audio\starting.wav',winsound.SND_FILENAME)
+        winsound.PlaySound('bot\\audio\\starting.wav',winsound.SND_FILENAME)
     elif str(event) == "Close":
         bot_thread.terminate()
         icon.menu = closed_menu
-        winsound.PlaySound('audio\closing.wav',winsound.SND_FILENAME)
+        winsound.PlaySound('bot\\audio\\closing.wav',winsound.SND_FILENAME)
     elif str(event) == "Restart":
         bot_thread.terminate()
         time.sleep(1) #wait to make sure
         bot_thread = subprocess.Popen([sys.executable, BOT_SCRIPT])
         icon.menu = started_menu
-        winsound.PlaySound('audio/restarting.wav',winsound.SND_FILENAME)
+        winsound.PlaySound('bot\\audio\\restarting.wav',winsound.SND_FILENAME)
         
 closed_menu = pystray.Menu(
     pystray.MenuItem("Start",handleclick),
@@ -63,6 +63,6 @@ started_menu = pystray.Menu(
 
 icon = pystray.Icon(name="LittLeBirDD",icon=iconimage,title="Example",menu=closed_menu)
 
-winsound.PlaySound('audio\init.wav',winsound.SND_FILENAME)
+winsound.PlaySound('bot\\audio\\init.wav',winsound.SND_FILENAME)
 icon.run()
 
