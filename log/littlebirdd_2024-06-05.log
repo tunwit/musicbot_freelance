@@ -1,0 +1,24 @@
+2024-06-05 20:57:00 CRITICAL     Uncaught exception
+Traceback (most recent call last):
+  File "d:\project\musicbot_freelance\bot\main.py", line 27, in <module>
+    from config import CONFIG,TOKEN,APPLICATION_ID,LOCAL_LAVALINK,DATABASE
+  File "d:\project\musicbot_freelance\bot\config.py", line 15, in <module>
+    with open(f"{parent}\\_config.json", "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\project\\_config.json'
+2024-06-05 21:13:59 CRITICAL     Uncaught exception
+Traceback (most recent call last):
+  File "d:\project\musicbot_freelance\bot\main.py", line 27, in <module>
+    from config import CONFIG,TOKEN,APPLICATION_ID,LOCAL_LAVALINK,DATABASE
+  File "d:\project\musicbot_freelance\bot\config.py", line 15, in <module>
+    with open(f"{parent}\\_config.json", "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\project\\_config.json'
+2024-06-05 21:33:18 CRITICAL     Uncaught exception
+Traceback (most recent call last):
+  File "d:\project\musicbot_freelance\bot\main.py", line 24, in <module>
+    from config import CONFIG,TOKEN,APPLICATION_ID,LOCAL_LAVALINK,DATABASE,PARENT
+  File "d:\project\musicbot_freelance\bot\config.py", line 15, in <module>
+    with open(f"{PARENT}\\_config.json", "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\project\\_config.json'

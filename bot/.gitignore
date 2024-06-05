@@ -11,3 +11,5 @@ python-3.11.8-amd64.exe
 *.db
 lavalink/
 lavalink.jar
+Lavalink.jar
+start_lavalink.bat
