@@ -57,9 +57,14 @@ async def node_connect():
     
     connection = await wavelink.Pool.connect(client=bot, nodes=[node])
     if connection[list(connection)[0]].status == wavelink.NodeStatus.DISCONNECTED:
-        winsound.PlaySound(f'{PARENT}/bot/audio/connect_to_Lava.wav',winsound.SND_FILENAME)
-        logger.critical(f"Unable to connect Lavalink, Make sure you have start Lavalink server via this path {PARENT}\\start_lavalink.bat")
-        sys.exit("Unable to connect Lavalink")
+        if LOCAL_LAVALINK:
+            winsound.PlaySound(f'{PARENT}/bot/audio/connect_to_Lava.wav',winsound.SND_FILENAME)
+            logger.critical(f"Unable to connect Lavalink, Make sure you have start Lavalink server via this path {PARENT}\\start_lavalink.bat")
+            sys.exit("Unable to connect Lavalink")
+        else :
+            winsound.PlaySound(f'{PARENT}/bot/audio/cannotconnect_contact.wav',winsound.SND_FILENAME)
+            logger.critical(f"Unable to connect Lavalink")
+            sys.exit("Unable to connect Lavalink")
 
 @bot.event
 async def on_ready():

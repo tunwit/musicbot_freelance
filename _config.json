@@ -3,5 +3,5 @@
     "defualt_prefix" : ".", 
     "nosongtime":30,
     "alonetime":25,
-    "local_lavalink":true
+    "local_lavalink":false
 }
