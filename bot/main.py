@@ -1,6 +1,6 @@
 import logsetup #essential
 import logging
-
+import subprocess
 from discord.ext import commands,tasks
 import json
 import os
@@ -21,7 +21,7 @@ from logging.handlers import TimedRotatingFileHandler
 import winsound
 
 logger = logging.getLogger('littlebirdd')
-from config import CONFIG,TOKEN,APPLICATION_ID,LOCAL_LAVALINK
+from config import CONFIG,TOKEN,APPLICATION_ID,LOCAL_LAVALINK,DATABASE,PARENT
 
 close_by_cooling = False
 intents = discord.Intents.all()
@@ -35,6 +35,7 @@ class Musicbot(commands.Bot):
             application_id=APPLICATION_ID,
         )
         self.config = CONFIG
+        self.database = DATABASE
 
     # Load all commands
     async def setup_hook(self):
@@ -49,20 +50,24 @@ bot = Musicbot()
 
 async def node_connect(): 
     if LOCAL_LAVALINK:
-        node = wavelink.Node(uri ='http://localhost:2333', password="youshallnotpass") # Local Lavalink server
+        node = wavelink.Node(uri ='http://localhost:2333', password="youshallnotpass",retries=1) # Local Lavalink server
     else:
         node = wavelink.Node(uri ='http://n1.ll.darrennathanael.com:2269', password="glasshost1984") # prefered Lavalink server
         # node2 = wavelink.Node(uri ='http://lavalink.rudracloud.com:2333', password="RudraCloud.com") # reserve Lavalink server
-    await wavelink.Pool.connect(client=bot, nodes=[node])
-
+    
+    connection = await wavelink.Pool.connect(client=bot, nodes=[node])
+    if connection[list(connection)[0]].status == wavelink.NodeStatus.DISCONNECTED:
+        winsound.PlaySound(f'{PARENT}/bot/audio/connect_to_Lava.wav',winsound.SND_FILENAME)
+        logger.critical(f"Unable to connect Lavalink, Make sure you have start Lavalink server via this path {PARENT}\\start_lavalink.bat")
+        sys.exit("Unable to connect Lavalink")
 
 @bot.event
 async def on_ready():
     await node_connect()
-    winsound.PlaySound('audio/ready.wav',winsound.SND_FILENAME)
     logger.info("-------------------------------")
     logger.info(f"{bot.user} is Ready")
     logger.info("-------------------------------")
+    winsound.PlaySound(f'{PARENT}/bot/audio/ready.wav',winsound.SND_FILENAME)
 
 
 @bot.event

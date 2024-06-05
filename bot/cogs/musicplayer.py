@@ -30,7 +30,6 @@ import io
 import logging
 import sys
 logger = logging.getLogger('littlebirdd')
-from config import DATABASE
 
 def unhandle_exception(exc_type, exc_value, exc_traceback):
     logger = logging.getLogger('littlebirdd')
@@ -328,7 +327,7 @@ class music(commands.Cog):
         
         if self.is_url(search):
             return
-        cursor = DATABASE.cursor()
+        cursor = self.bot.self.bot.database.cursor()
         data = cursor.execute("SELECT * FROM search_history WHERE music = ?",(search,))
         result = data.fetchall()
         if not result:
@@ -336,7 +335,7 @@ class music(commands.Cog):
             cursor.execute("INSERT INTO search_history (music,times) VALUES (?,?)",(search,1,))
         else:
             cursor.execute("UPDATE search_history SET times = times + 1 WHERE music = ?",(search,))
-        DATABASE.commit()
+        self.bot.database.commit()
         cursor.close()
 
     @app_commands.command(name="play", description="play music")
@@ -419,7 +418,7 @@ class music(commands.Cog):
         interaction,
         current: str,
     ) -> List[app_commands.Choice[str]]:
-        cursor = DATABASE.cursor()
+        cursor = self.bot.database.cursor()
         
         source = cursor.execute("SELECT * FROM search_history ORDER BY times DESC LIMIT 3")
 
