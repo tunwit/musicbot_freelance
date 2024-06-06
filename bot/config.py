@@ -19,18 +19,6 @@ with open(f"{PARENT}\\_config.json", "r") as f:
 load_dotenv('.env.development')
 logger.info('Load new .env.development')
 
-if not os.path.exists(f'{PARENT}\\bot\\data'):
-    os.makedirs(f'{PARENT}\\bot\\data')
-connection = sqlite3.connect(f'{PARENT}\\bot\\data\\bot_data.db')
-connection.execute(''' 
-        CREATE TABLE IF NOT EXISTS search_history (
-        id      INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        music   TEXT ,
-        times   INTEGER 
-        );
-        ''')
-connection.commit()
-
 LOCAL_LAVALINK = config['local_lavalink']
 if LOCAL_LAVALINK: 
     if not os.path.exists(f"{PARENT}\\bot\\lavalink"):
@@ -69,5 +57,4 @@ if LOCAL_LAVALINK:
 CONFIG = config
 TOKEN = os.getenv('TOKEN')
 APPLICATION_ID = os.getenv('APPLICATION_ID')
-DATABASE = connection
 

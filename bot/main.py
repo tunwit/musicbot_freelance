@@ -21,7 +21,7 @@ from logging.handlers import TimedRotatingFileHandler
 import winsound
 
 logger = logging.getLogger('littlebirdd')
-from config import CONFIG,TOKEN,APPLICATION_ID,LOCAL_LAVALINK,DATABASE,PARENT
+from config import CONFIG,TOKEN,APPLICATION_ID,LOCAL_LAVALINK,PARENT
 
 close_by_cooling = False
 intents = discord.Intents.all()
@@ -35,7 +35,6 @@ class Musicbot(commands.Bot):
             application_id=APPLICATION_ID,
         )
         self.config = CONFIG
-        self.database = DATABASE
 
     # Load all commands
     async def setup_hook(self):
