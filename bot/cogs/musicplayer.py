@@ -16,7 +16,6 @@ import random
 from ui.embed_gen import createembed
 from ui.language_respound import get_respound
 from ui.button import buttin
-from ui.controlpanal import *
 import requests
 import random
 import os
@@ -341,24 +340,6 @@ class music(commands.Cog):
             setattr(vc, "loop", "False")
             setattr(vc, "task", None)
             setattr(vc, "Myview", None)
-            setattr(vc, "interaction", interaction)
-            pre = pr(interaction,nowplaying.np)
-            pl = pp(interaction,nowplaying.np)
-            loop = lo(interaction,nowplaying.np)
-            skip = sk(interaction,nowplaying.np)
-            # voldown = dw(interaction)
-            # volup = uw(interaction)
-            # clear = cl(interaction)
-            disconnect = dc(interaction,nowplaying.np)
-            vc.Myview = View(timeout=None)
-            vc.Myview.add_item(loop)
-            vc.Myview.add_item(pre)
-            vc.Myview.add_item(pl)
-            vc.Myview.add_item(skip)
-            # vc.Myview.add_item(voldown)
-            # vc.Myview.add_item(volup)
-            # vc.Myview.add_item(clear)
-            vc.Myview.add_item(disconnect)
             vc.autoplay = wavelink.AutoPlayMode.partial
 
         vc.interaction = interaction
@@ -614,20 +595,6 @@ class music(commands.Cog):
                 d = await interaction.followup.send(embed=embed)
                 await asyncio.sleep(5)
                 await d.delete()
-
-    @app_commands.command(name="shuffle", description="Shuffle music queue")
-    async def shuffle(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        vc: wavelink.Player = interaction.guild.voice_client
-        if await self.check_before_play(interaction):
-            vc: wavelink.Player = interaction.guild.voice_client
-            vc.interaction = interaction
-            vc.queue.shuffle()
-            respound = get_respound(interaction.locale, "shuffle")
-            embed = createembed.embed_success(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
 
     @app_commands.command(name="disconnect", description="Leave voice chat")
     async def dc(self, interaction: discord.Interaction):
