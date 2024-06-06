@@ -30,7 +30,9 @@ connection.execute('''
 connection.commit()
 
 LOCAL_LAVALINK = config['local_lavalink']
-if LOCAL_LAVALINK:
+if LOCAL_LAVALINK: 
+    if not os.path.exists(f"{PARENT}\\bot\\lavalink"):
+        os.makedirs(f"{PARENT}\\bot\\lavalink")
     logger.info("using Local Lavalink")
     if not os.path.isfile(f"{PARENT}\\bot\\lavalink\\Lavalink.jar"):
         try:
@@ -43,6 +45,19 @@ if LOCAL_LAVALINK:
             logger.info('Lavalink success fully dowloaded')        
         except requests.exceptions.RequestException as e:
             logger.info(f'Fail to dowload Lavalike due to \n{e}')  
+            sys.exit()
+
+    if not os.path.isfile(f"{PARENT}\\bot\\lavalink\\application.yml"):
+        try:
+            logger.info('Downloading application.yml.')
+            response = requests.get('https://raw.githubusercontent.com/tunwit/Lavalink/main/application.yml', stream=True)
+            response.raise_for_status()
+            with open(f"{PARENT}\\bot\\lavalink\\application.yml", 'wb') as file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    file.write(chunk)
+            logger.info('application.yml success fully dowloaded')        
+        except requests.exceptions.RequestException as e:
+            logger.info(f'Fail to dowload application.yml due to \n{e}')  
             sys.exit()
 
     if not os.path.isfile(f"{PARENT}\\start_lavalink.bat"):      
