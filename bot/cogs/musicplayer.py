@@ -45,10 +45,6 @@ trans_queueMode= {
             'wavelink.QueueMode.loop_all':"Queue"
         }
 
-trans_autoMode= {
-            'wavelink.AutoPlayMode.partial':"Disable",
-            'wavelink.AutoPlayMode.enabled':"Enable"
-        }
 
 def convert(milliseconds):
     seconds = milliseconds // 1000  # Convert milliseconds to seconds
@@ -113,7 +109,7 @@ class nowplaying:
                         name=f"{respound.get('duration')}", value=f"`{duration}`"
                     )
                     npembed.set_footer(
-                        text=f"{'Paused'if vc.paused else 'Playing'} | {vc.volume}% | LoopStatus:{trans_queueMode[f'wavelink.{str(vc.queue.mode)}']} | Autoplay:{trans_autoMode[f'wavelink.{str(vc.autoplay)}']}"
+                        text=f"{'Paused'if vc.paused else 'Playing'} | {vc.volume}% | LoopStatus:{trans_queueMode[f'wavelink.{str(vc.queue.mode)}']}"
                     )
                     npembed.set_image(url=vc.current.artwork)
                     more = f"`{respound.get('andmore').format(more=len(lst)-4)}`"
@@ -186,7 +182,7 @@ class nowplaying:
                         name=f"{respound.get('duration')}", value=f"`{duration}`"
                     )
                     npembed.set_footer(
-                        text=f"{'Paused'if vc.paused else 'Playing'} | {vc.volume}% | LoopStatus:{trans_queueMode[f'wavelink.{str(vc.queue.mode)}']} | Autoplay:{trans_autoMode[f'wavelink.{str(vc.autoplay)}']}"
+                        text=f"{'Paused'if vc.paused else 'Playing'} | {vc.volume}% | LoopStatus:{trans_queueMode[f'wavelink.{str(vc.queue.mode)}']}"
                     )
                     npembed.set_thumbnail(url=vc.current.artwork)
                     more = f"`{respound.get('andmore').format(more=len(lst)-4)}`"
@@ -290,29 +286,6 @@ class music(commands.Cog):
             except:
                 pass
             vc.task = self.bot.loop.create_task(self.current_time(vc.interaction))
-            
-    @app_commands.command(
-        name="autoplay",
-        description="when ran out of music bot will random music for you",
-    )
-    async def autoplay(self, interaction: discord.Interaction):
-        await interaction.response.defer()      
-        if await self.check_before_play(interaction):
-            vc: wavelink.Player = interaction.guild.voice_client
-            vc.interaction = interaction
-            au = [x for x in vc.Myview.children if x.custom_id == "au"][0]
-            if vc.autoplay == wavelink.AutoPlayMode.partial:
-                vc.autoplay = wavelink.AutoPlayMode.enabled
-                au.style = discord.ButtonStyle.green
-            elif vc.autoplay == wavelink.AutoPlayMode.enabled:
-                vc.autoplay = wavelink.AutoPlayMode.partial
-                au.style = discord.ButtonStyle.gray
-            await nowplaying.np(self, interaction)
-            respound = get_respound(interaction.locale, "autoplay")
-            embed = createembed.embed_success(interaction, respound)
-            d = await interaction.followup.send(embed=embed)
-            await asyncio.sleep(5)
-            await d.delete()
 
     def is_url(self,url):
         try:
@@ -327,7 +300,7 @@ class music(commands.Cog):
         
         if self.is_url(search):
             return
-        cursor = self.bot.self.bot.database.cursor()
+        cursor = self.bot.database.cursor()
         data = cursor.execute("SELECT * FROM search_history WHERE music = ?",(search,))
         result = data.fetchall()
         if not result:
@@ -376,11 +349,9 @@ class music(commands.Cog):
             # voldown = dw(interaction)
             # volup = uw(interaction)
             # clear = cl(interaction)
-            auto = au(interaction,nowplaying.np)
             disconnect = dc(interaction,nowplaying.np)
             vc.Myview = View(timeout=None)
             vc.Myview.add_item(loop)
-            vc.Myview.add_item(auto)
             vc.Myview.add_item(pre)
             vc.Myview.add_item(pl)
             vc.Myview.add_item(skip)

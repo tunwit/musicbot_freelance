@@ -248,34 +248,3 @@ class dc(Button):
             await interaction.followup.send(content="")
         except:
             pass
-
-
-class au(Button):
-    def __init__(self, interaction,np):
-        super().__init__(
-            emoji="<a:9_:989120446706364416>",
-            style=discord.ButtonStyle.gray,
-            custom_id="au",
-        )
-        self.interaction: discord.Interaction = interaction
-        self.np = np
-        
-
-    async def callback(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        vc: wavelink.Player = interaction.guild.voice_client
-        vc.interaction = interaction
-        au = [x for x in vc.Myview.children if x.custom_id == "au"][0]
-        if not await check_before_play(self.interaction):
-            return
-        if vc.autoplay == wavelink.AutoPlayMode.partial:
-            vc.autoplay = wavelink.AutoPlayMode.enabled
-            au.style = discord.ButtonStyle.green
-        elif vc.autoplay == wavelink.AutoPlayMode.enabled:
-            vc.autoplay = wavelink.AutoPlayMode.partial
-            au.style = discord.ButtonStyle.gray
-        await self.np(self, self.interaction)
-        try:
-            await interaction.followup.send(content="")
-        except:
-            pass
