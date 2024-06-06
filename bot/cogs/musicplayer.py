@@ -135,18 +135,18 @@ class nowplaying:
                         npembed.set_image(url="attachment://image.png")
                         if send:
                             content = f'**{respound.get("queue")}:**\n{fmt}'f'\n{more}' if more else f'**{respound.get("queue")}:**\n{fmt}'
-                            vc.np = await vc.interaction.followup.send(content=content, embed=npembed,view=vc.Myview ,file=file)
+                            vc.np = await vc.interaction.followup.send(content=content, embed=npembed,file=file)
                             return vc.np
                         if vc.np:
                             try:
                                 content = f'**{respound.get("queue")}:**\n{fmt}'f'\n{more}' if more else f'**{respound.get("queue")}:**\n{fmt}'
-                                vc.np = await vc.interaction.followup.edit_message(message_id=vc.np.id,content=content, embed=npembed,view=vc.Myview ,attachments=[file])
+                                vc.np = await vc.interaction.followup.edit_message(message_id=vc.np.id,content=content, embed=npembed,attachments=[file])
                             except:
                                 content = f'**{respound.get("queue")}:**\n{fmt}'f'\n{more}' if more else f'**{respound.get("queue")}:**\n{fmt}'
-                                vc.np = await vc.interaction.followup.edit_message(message_id=vc.np.id,content=content, embed=npembed,view=vc.Myview ,attachments=[file])
+                                vc.np = await vc.interaction.followup.edit_message(message_id=vc.np.id,content=content, embed=npembed,attachments=[file])
                         else:
                             content = f'**{respound.get("queue")}:**\n{fmt}'f'\n{more}' if more else f'**{respound.get("queue")}:**\n{fmt}'
-                            vc.np = await vc.interaction.followup.send(content=content, embed=npembed,view=vc.Myview,file=file)
+                            vc.np = await vc.interaction.followup.send(content=content, embed=npembed,file=file)
                         return vc.np
                                      
     async def np(self,interaction, send=False): # thumbnail with progressbar
@@ -208,18 +208,18 @@ class nowplaying:
                         npembed.set_image(url="attachment://image.png")
                         if send:
                             content = f'**{respound.get("queue")}:**\n{fmt}'f'\n{more}' if more else f'**{respound.get("queue")}:**\n{fmt}'
-                            vc.np = await vc.interaction.followup.send(content=content, embed=npembed,view=vc.Myview ,file=file)
+                            vc.np = await vc.interaction.followup.send(content=content, embed=npembed,file=file)
                             return vc.np
                         if vc.np:
                             try:
                                 content = f'**{respound.get("queue")}:**\n{fmt}'f'\n{more}' if more else f'**{respound.get("queue")}:**\n{fmt}'
-                                vc.np = await vc.interaction.followup.edit_message(message_id=vc.np.id,content=content, embed=npembed,view=vc.Myview ,attachments=[file])
+                                vc.np = await vc.interaction.followup.edit_message(message_id=vc.np.id,content=content, embed=npembed,attachments=[file])
                             except:
                                 content = f'**{respound.get("queue")}:**\n{fmt}'f'\n{more}' if more else f'**{respound.get("queue")}:**\n{fmt}'
-                                vc.np = await vc.interaction.followup.edit_message(message_id=vc.np.id,content=content, embed=npembed,view=vc.Myview ,attachments=[file])
+                                vc.np = await vc.interaction.followup.edit_message(message_id=vc.np.id,content=content, embed=npembed,attachments=[file])
                         else:
                             content = f'**{respound.get("queue")}:**\n{fmt}'f'\n{more}' if more else f'**{respound.get("queue")}:**\n{fmt}'
-                            vc.np = await vc.interaction.followup.send(content=content, embed=npembed,view=vc.Myview,file=file)
+                            vc.np = await vc.interaction.followup.send(content=content, embed=npembed,file=file)
                         return vc.np
 
 class music(commands.Cog):
@@ -293,23 +293,6 @@ class music(commands.Cog):
         except ValueError:
             return False
 
-    async def statistic(self, search):
-        if len(search) > 99:
-            return
-        
-        if self.is_url(search):
-            return
-        cursor = self.bot.database.cursor()
-        data = cursor.execute("SELECT * FROM search_history WHERE music = ?",(search,))
-        result = data.fetchall()
-        if not result:
-            print('no data')
-            cursor.execute("INSERT INTO search_history (music,times) VALUES (?,?)",(search,1,))
-        else:
-            cursor.execute("UPDATE search_history SET times = times + 1 WHERE music = ?",(search,))
-        self.bot.database.commit()
-        cursor.close()
-
     @app_commands.command(name="play", description="play music")
     @app_commands.describe(search="Music name")
     async def play(self, interaction: discord.Interaction, search: str):
@@ -334,12 +317,10 @@ class music(commands.Cog):
 
         await interaction.guild.change_voice_state(channel=interaction.user.voice.channel, self_mute=False, self_deaf=True)
         
-        await self.statistic(search)
         if not vc.playing and not vc.queue:
             setattr(vc, "np", None)
             setattr(vc, "loop", "False")
             setattr(vc, "task", None)
-            setattr(vc, "Myview", None)
             vc.autoplay = wavelink.AutoPlayMode.partial
 
         vc.interaction = interaction
@@ -364,23 +345,6 @@ class music(commands.Cog):
             await self.addtoqueue(track, interaction)
             await nowplaying.np(self, interaction)
 
-    @play.autocomplete("search")
-    async def play_autocomplete(
-        self,
-        interaction,
-        current: str,
-    ) -> List[app_commands.Choice[str]]:
-        cursor = self.bot.database.cursor()
-        
-        source = cursor.execute("SELECT * FROM search_history ORDER BY times DESC LIMIT 3")
-
-        if len(current) > 0:
-            source = cursor.execute("SELECT * FROM search_history WHERE music LIKE ? COLLATE NOCASE LIMIT 25",(f"%{current}%",))
-        
-        result = [app_commands.Choice(name = l[1],value=l[1]) for l in source]
-        cursor.close()
-        return result
-    
     def convert(self, seconds):
         seconds = seconds % (24 * 3600)
         hour = seconds // 3600
@@ -519,13 +483,6 @@ class music(commands.Cog):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
             vc.queue.mode = eval(status)
-            lo = [x for x in vc.Myview.children if x.custom_id == "lo"][0]
-            if vc.queue.mode == wavelink.QueueMode.normal:
-                lo.style = discord.ButtonStyle.gray
-            elif vc.queue.mode == wavelink.QueueMode.loop:
-                lo.style = discord.ButtonStyle.blurple
-            elif vc.queue.mode == wavelink.QueueMode.loop_all:
-                lo.style = discord.ButtonStyle.green
             await nowplaying.np(self, interaction)
             respound = get_respound(interaction.locale, "loop")
             embed = createembed.embed_success(interaction, respound,trans_queueMode[status])
@@ -539,9 +496,7 @@ class music(commands.Cog):
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
-            re = [x for x in vc.Myview.children if x.custom_id == "pp"][0]
-            re.style = discord.ButtonStyle.green
-            re.emoji = "<a:1_:989120454063185940>"
+
             await vc.pause(False)
             respound = get_respound(interaction.locale, "resume")
             embed = createembed.embed_success(interaction, respound)
@@ -556,9 +511,6 @@ class music(commands.Cog):
         if await self.check_before_play(interaction):
             vc: wavelink.Player = interaction.guild.voice_client
             vc.interaction = interaction
-            re = [x for x in vc.Myview.children if x.custom_id == "pp"][0]
-            re.style = discord.ButtonStyle.red
-            re.emoji = "<a:2_:989120456240025670>"
             await vc.pause(True)
             await nowplaying.np(self, interaction)
             respound = get_respound(interaction.locale, "pause")
