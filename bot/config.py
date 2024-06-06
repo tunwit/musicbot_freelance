@@ -20,7 +20,7 @@ load_dotenv('.env.development')
 logger.info('Load new .env.development')
 
 if not os.path.exists(f'{PARENT}\\bot\\data'):
-    os.makedirs('{PARENT}\\bot\\data')
+    os.makedirs(f'{PARENT}\\bot\\data')
 connection = sqlite3.connect(f'{PARENT}\\bot\\data\\bot_data.db')
 connection.execute(''' 
         CREATE TABLE IF NOT EXISTS search_history (
